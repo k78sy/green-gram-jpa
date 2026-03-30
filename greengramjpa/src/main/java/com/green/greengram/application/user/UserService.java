@@ -64,21 +64,21 @@ public class UserService {
 
     public UserSignInRes signIn(UserSignInReq req) {
 //        UserGetOneRes res = userMapper.findByUid( req.getUid() );
-//        log.info("res: {}", res);
-//        if(res == null || !passwordEncoder.matches(req.getUpw(), res.getUpw())) { // 비밀번호가 맞지 않으면?
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아이디, 비밀번호를 확인해 주세요.");
-//        }
-        //로그인 성공!! 예전에는 AT, RT을 FE전달  >>> 보안 쿠키 이용
+        User user = userRepository.findByUid( req.getUid() );
+        log.info( "user : {}" , user );
+        if(user == null || !passwordEncoder.matches(req.getUpw(), user.getUpw())) { // 비밀번호가 맞지 않으면?
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아이디, 비밀번호를 확인해 주세요.");
+        }
+//        로그인 성공!! 예전에는 AT, RT을 FE전달  >>> 보안 쿠키 이용
 //        JwtUser jwtUser = new JwtUser(res.getId());
 //        String accessToken = jwtTokenProvider.generateAccessToken(jwtUser);
 //        String refreshToken = jwtTokenProvider.generateRefreshToken(jwtUser);
 
-//        return UserSignInRes.builder()
-//                .signedUserId( res.getId() )
-//                .nm( res.getNm() )
-//                .pic( res.getPic() )
-//                .build();
-        return null;
+        return UserSignInRes.builder()
+                .signedUserId( user.getId() )
+                .nm( user.getNm() )
+                .pic( user.getPic() )
+                .build();
     }
 
     public UserProfileGetRes getProfileUser (UserProfileGetReq req) {
@@ -90,18 +90,24 @@ public class UserService {
         3: 서로 팔로우 한 상태
         * */
 
-//        return userMapper.findProfileUser(req);
         return null;
     }
 
     public String patchProfilePic(long signedUserId, MultipartFile pic) {
         //기존 프로파일 사진은 삭제, 기존 파일명을 구해야 함.
 //        UserGetOneRes res = userMapper.findById( signedUserId );
+        /*
+            아래 res는 영속성이 있는 객체라고 부른다.
+            영속성이 있다? 엔티티 매니저가 관리하는 객체라는 의미.
+            관리한다?
+        * */
+        User res = userRepository.findById( signedUserId ).orElseThrow(); // null처리를 나이스하게. null이 들어오면 곧장 에러
+
         String folderPath = String.format("user/%d", signedUserId);
 
         //파일 삭제 고고!!
-//        String existedFilePath = String.format("%s/%s", folderPath, res.getPic());
-//        myFileUtil.deleteFile(existedFilePath);
+        String existedFilePath = String.format("%s/%s", folderPath, res.getPic());
+        myFileUtil.deleteFile(existedFilePath);
 
         //폴더 생성
         myFileUtil.makeFolders(folderPath);
@@ -116,14 +122,11 @@ public class UserService {
             throw new RuntimeException(e);
         }
 
-//        //DB 수정처리
-//        UserUpdDto dto = UserUpdDto.builder()
-//                .id(signedUserId)
-//                .pic(saveFileName)
-//                .build();
-//        userMapper.updUser(dto);
-//        return saveFileName;
-        return null;
+        res.setPic( saveFileName);
+
+        userRepository.save(res); // 영속성이 있는 객체를 save하면 update문이 된다.
+
+        return saveFileName;
     }
 
     public void deleteProfilePic(long signedUserId){
