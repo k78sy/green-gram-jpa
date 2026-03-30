@@ -15,7 +15,7 @@ import lombok.Setter;
                 @UniqueConstraint(name="uk_feed_pic", columnNames = {"feed_id", "pic"})
         }
 )
-public class FeedPic {
+public class FeedPic extends CreatedAt {
     @Id // 대리키 PK
     @GeneratedValue(strategy = GenerationType.IDENTITY) // AUTO_INCREMENT
     private Long id;

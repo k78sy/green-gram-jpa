@@ -20,7 +20,7 @@ import lombok.*;
                 // 유니크 속성 걸면 자동으로 인덱스 생성
         }
 )
-public class FeedLike {
+public class FeedLike extends CreatedAt {
     @Id // 대리키 PK
     @GeneratedValue(strategy = GenerationType.IDENTITY) // AUTO_INCREMENT
     private Long id;
