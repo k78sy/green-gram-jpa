@@ -1,8 +1,12 @@
 package com.green.greengram.application.feed;
 
 import com.green.greengram.application.feed.model.*;
+import com.green.greengram.application.user.UserRepository;
 import com.green.greengram.configuration.util.ImgUploadManager;
 import com.green.greengram.configuration.util.MyFileUtil;
+import com.green.greengram.entity.Feed;
+import com.green.greengram.entity.FeedPic;
+import com.green.greengram.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,21 +22,42 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FeedService {
     private final FeedMapper feedMapper;
+    private final FeedRepository feedRepository;
+    private final FeedPicRepository feedPicRepository;
     private final ImgUploadManager imgUploadManager;
     private final MyFileUtil myFileUtil;
+    private final UserRepository userRepository;
 
     @Transactional
     public FeedPostRes postFeed(FeedPostReq req, List<MultipartFile> pics){
-        int saveAffectedRows = feedMapper.save(req);
+        Feed newFeed = new Feed();
 
-        //이후에 방금 insert한 feed테이블의 id값이 필요.
-        long feedId = req.getFeedId();
+        // 프론트에서 받아온 데이터 넣기
+        newFeed.setContent( req.getContents() );
+        newFeed.setLocation( req.getLocation() );
+
+        // 로그인 유저 데이터 넣기
+        User signedUser = new User();
+        signedUser.setId( req.getSignedUserId() );
+        newFeed.setWriterUser( signedUser );
+
+        // 현 시점까지는 newFeed는 영속성이 없음
+
+        feedRepository.save( newFeed ); // 이 시점부터 FeedId 존재
+        // save 메소드 호출 후 newFeed 영속성이 생긴다.
+
+        // feedId 그냥 가져오면 됨
+        long feedId = newFeed.getId();
         log.info("feedId:{}", feedId);
 
-        // saveFeedPics 메소드 호출.
+        // feed
         List<String> picSavedNames = imgUploadManager.saveFeedPics( feedId, pics );
+
         try {
-            feedMapper.savePics(feedId, picSavedNames);
+            for(String pic : picSavedNames){
+                FeedPic newFeedPic = new FeedPic( newFeed, pic );
+                feedPicRepository.save( newFeedPic );
+            }
         } catch (Exception e) {
             //사진을 지운다.
             String directoryPath = String.format("%s/feed/%d", myFileUtil.fileUploadPath, feedId);
