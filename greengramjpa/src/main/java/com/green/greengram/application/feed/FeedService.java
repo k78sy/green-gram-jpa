@@ -33,7 +33,7 @@ public class FeedService {
         Feed newFeed = new Feed();
 
         // 프론트에서 받아온 데이터 넣기
-        newFeed.setContent( req.getContents() );
+        newFeed.setContents( req.getContents() );
         newFeed.setLocation( req.getLocation() );
 
         // 로그인 유저 데이터 넣기

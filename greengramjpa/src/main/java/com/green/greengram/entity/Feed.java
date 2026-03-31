@@ -18,7 +18,7 @@ public class Feed extends CreatedUpdatedAt {
     private String location;
 
     @Column(length = 1000)
-    private String content;
+    private String contents;
 
     @ManyToOne // 다대하나// 앞에 있는게 나, to 상대방
     @JoinColumn(name = "user_id", nullable = false)

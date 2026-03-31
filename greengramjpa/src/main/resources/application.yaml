@@ -26,7 +26,7 @@ spring:
   jpa:
     database: mysql
     hibernate:
-      ddl-auto: update # 데이터 정의어 - CREATE, ALTER, DROP (update:없으면 만들고, 있으면 수정) (create:항상 새로 만듬)
+      ddl-auto: create # 데이터 정의어 - CREATE, ALTER, DROP (update:없으면 만들고, 있으면 수정) (create:항상 새로 만듬)
     properties:
       hibernate:
         jdbc:
@@ -34,3 +34,8 @@ spring:
         format_sql: true # SQL문을 보기좋게 포맷을 할거냐
         order_update: true # 배치 작업 활성화
     show_sql: true # JPA가 쿼리문 로그에 출력
+
+mybatis: # Mybatis 세팅
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: mappers/**/*.xml # xml 파일 위치
