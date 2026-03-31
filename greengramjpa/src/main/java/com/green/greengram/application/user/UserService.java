@@ -17,7 +17,7 @@ import java.io.IOException;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-//    private final UserMapper userMapper;
+    private final UserMapper userMapper;
     private final UserRepository userRepository; //DI 의존성 주입 받음!
     private final PasswordEncoder passwordEncoder;
     private final MyFileUtil myFileUtil;
@@ -90,7 +90,7 @@ public class UserService {
         3: 서로 팔로우 한 상태
         * */
 
-        return null;
+        return userMapper.findProfileUser(req);
     }
 
     public String patchProfilePic(long signedUserId, MultipartFile pic) {
