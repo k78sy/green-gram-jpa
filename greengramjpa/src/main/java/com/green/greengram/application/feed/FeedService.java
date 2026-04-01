@@ -68,17 +68,22 @@ public class FeedService {
         return new FeedPostRes(feedId,picSavedNames);
     }
 
-    public List<FeedGetRes> getFeedList(FeedGetReq req){
-        List<FeedGetRes> list = feedMapper.findAll(req);
-        // 작업! 피드당 사진 정보를 가져오는 작업을 해야한다
-        // 실무에서 사용하지 않는 방법. N+1 이슈를 해결하는게 쉽지 않다
-        for(FeedGetRes res : list){
-            // 사진 가져오는 select
-            List<String> pics = feedMapper.findPicsById(res.getId());
-            res.setPics(pics);
-            
-        }
-        return list;
+//    // 기존 방법
+//    public List<FeedGetRes> getFeedList(FeedGetReq req){
+//        List<FeedGetRes> list = feedMapper.findAll(req);
+//        // 작업! 피드당 사진 정보를 가져오는 작업을 해야한다
+//        // 실무에서 사용하지 않는 방법. N+1 이슈를 해결하는게 쉽지 않다
+//        for(FeedGetRes res : list){
+//            // 사진 가져오는 select
+//            List<String> pics = feedMapper.findPicsById(res.getId());
+//            res.setPics(pics);
+//        }
+//        return list;
+//    }
+
+    // n+1 이슈 해결한 MyBatis 방법
+    public List<FeedGetRes> getFeedList2(FeedGetReq req){
+        return feedMapper.findAllResultMap(req);
     }
 
     @Transactional
