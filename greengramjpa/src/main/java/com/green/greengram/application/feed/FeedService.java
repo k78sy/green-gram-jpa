@@ -88,11 +88,13 @@ public class FeedService {
 
     @Transactional
     public int deleteFeed(FeedDeleteReq req){
-        // feed_pic, feed_like, feed_comment 먼저 삭제
-        feedMapper.deleteRef( req );
 
-        //feed 테이블의 row는 가장 마지막에 삭제 처리
-        feedMapper.delete( req );
+        User signedUser = new User();
+        signedUser.setId( req.getSignedUserId() );
+        Feed feedForDel = feedRepository.findByIdAndWriterUser( req.getFeedId(), signedUser )
+                //Optional 사용: null처리 나이스하게 사용하기...
+                .orElseThrow( () -> new IllegalArgumentException("삭제 권한이 없습니다.") );
+        feedRepository.delete( feedForDel );
 
         // 폴더 째 삭제
         String delDirectoryPath = String.format( "%s/feed/%d", myFileUtil.fileUploadPath, req.getFeedId() );
